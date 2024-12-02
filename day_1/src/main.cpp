@@ -143,6 +143,10 @@ int p1() {
 }
 
 int main() {
-    /* p1(); */
-    p2();
+#ifdef PART1
+  p1();
+#endif
+#ifndef PART1
+  p2();
+#endif
 }
