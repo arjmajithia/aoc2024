@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
@@ -10,7 +9,6 @@
 
 bool check_if_valid(std::vector<int> input) {
   bool descending = false;
-
   if (input[0] < input[1]) { descending = false; }
   else { descending = true; }
 
@@ -61,33 +59,20 @@ int p2() {
     std::cout << "file is closed\n";
   }
 
-  bool broken = false;
   std::vector<int> invalids;
   std::vector<int> valids;
-  /* std::cout << report_map.size() << std::endl; */
   for (int j = 0; j < report_map.size(); ++j) {
     auto r = report_map[j];
-    bool descending = false;
-
-    if (r[0] < r[1]) { descending = false; }
-    else { descending = true; }
-
-    for (int i = 1; i < r.size(); ++i) {
-      if (!check_if_valid(r)) {
-        invalids.push_back(j); broken = true;
-        break;
-      }
+    if (!check_if_valid(r)) {
+      invalids.push_back(j);
+      continue;
     }
-    if (!broken) {
-      valids.push_back(j);
-    }
-    broken = false;
+    valids.push_back(j);
   }
 
   for (auto j : invalids) {
-    auto v = report_map[j];
-    for (int i = 0; i < v.size(); ++i) {
-      auto copy_v = v;
+    for (int i = 0; i < report_map[j].size(); ++i) {
+      auto copy_v = report_map[j];
       copy_v.erase(copy_v.begin() + i);
       if (check_if_valid(copy_v)) {
         valids.push_back(j);
@@ -139,45 +124,15 @@ int p1() {
     std::cout << "file is closed\n";
   }
 
-  bool broken = false;
   std::vector<int> invalids;
   std::vector<int> valids;
-  /* std::cout << report_map.size() << std::endl; */
   for (int j = 0; j < report_map.size(); ++j) {
     auto r = report_map[j];
-    bool descending = false;
-
-    if (r[0] < r[1]) { descending = false; }
-    else { descending = true; }
-
-    for (int i = 1; i < r.size(); ++i) {
-      if (!check_if_valid(r)) {
-        invalids.push_back(j); broken = true;
-        break;
-      }
-      /* if (descending && r[i] > r[i-1]) { */
-      /*   invalids.push_back(j); broken = true; */
-      /*   break; */
-      /* } else if (!descending && r[i] < r[i-1]) { */
-      /*   invalids.push_back(j); broken = true; */
-      /*   break; */
-      /* } else if (r[i] == r[i-1]) { */
-      /*   invalids.push_back(j); broken = true; */
-      /*   break; */
-      /* } */
-      /* if (std::abs(r[i] - r[i-1]) > 3) { */
-      /*   invalids.push_back(j); broken = true; */
-      /*   break; */
-      /* } */
+    if (!check_if_valid(r)) {
+      invalids.push_back(j);
+      continue;
     }
-    if (!broken) {
-      valids.push_back(j);
-    }
-    broken = false;
-    /* std::cout << std::endl; */
-    /* auto ret = std::is_sorted(r.second.begin(), r.second.end(),  */
-    /*     [](const int &a, const int &b){ return (std::abs(a-b) < 2); }); */
-    /* std::cout << ret << std::endl; */
+    valids.push_back(j);
   }
   std::cout << "Valid count: " << valids.size() << std::endl;
 
