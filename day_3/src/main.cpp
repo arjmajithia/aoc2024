@@ -1,24 +1,15 @@
+#include <algorithm>
 #include <cctype>
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
-bool check_if_valid(std::vector<int> input) {
-  bool descending = false;
-  if (input[0] < input[1]) { descending = false; }
-  else { descending = true; }
-
-  for (int i = 1; i < input.size(); ++i) {
-    if (descending && input[i] > input[i-1]) { return false; } 
-    else if (!descending && input[i] < input[i-1]) { return false; } 
-    else if (input[i] == input[i-1]) { return false; }
-    if (std::abs(input[i] - input[i-1]) > 3) { return false; }
-  }
-  return true;
+bool is_number(std::string s) {
+  return !s.empty() && std::find_if(s.begin(), s.end(), 
+      [](unsigned char c){ return !std::isdigit(c); }) == s.end();
 }
 
 int p2() {
@@ -31,27 +22,89 @@ int p2() {
 
   std::cout << "Loaded file\n";
   std::string line;
-  std::unordered_map<int, std::vector<int>> report_map;
+  std::vector<std::string> valid_;
 
   int line_num = 0;
   if (input_file.is_open()) {
     while(std::getline(input_file, line))
     {
-      std::vector<int> report;
+      bool do_ = true;
       std::string str_value;
-      for (int i = 0; i < line.length(); ++i) {
-        if (isspace(line[i])) { 
-          report.push_back(std::atoi(str_value.c_str()));
+      std::string int_value;
+      bool int_val = false;
+      bool first_val = false;
+      for (int i = 0; i < line.length(); i++) {
+        char c = line[i];
+        /* std::cout << str_value << std::endl; */
+        if (str_value.find("do()") != std::string::npos && str_value.find("don't()") == std::string::npos) { // prob better way of doing this, idgaf
           str_value.clear();
-          continue; 
+          do_ = true;
         }
-        str_value += line[i];
-      }
-      report.push_back(std::atoi(str_value.c_str()));
-      str_value.clear();
+        if (str_value.find("do()") == std::string::npos && str_value.find("don't()") != std::string::npos) {
+          str_value.clear();
+          do_ = false;
+        }
+        if (do_) {
+          if (str_value == "mul" && c != '(') { str_value.clear(); }
+          if (c == 'm') {
+            str_value.clear();
+            int_value.clear();
+          }
+          if (c == '(' && str_value == "mul") {
+            str_value += c;
+            int_val = true;
+            /* std::cout << "str val: " << str_value << std::endl; */
+          }
+          if (c == ',' || c == ')') {
+            if (is_number(int_value)) {
+              if (!first_val && str_value.find("mul") == std::string::npos) {
+                str_value.clear();
+                continue;
+              }
+              /* std::cout << "pushing int val: " << int_value << std::endl; */
+              /* std::cout << "___str val: " << str_value << std::endl; */
+              valid_.push_back(int_value);
+              int_value.clear();
 
-      report_map[line_num] = std::move(report);
-      line_num++;
+              if (first_val) { first_val = false; }
+              else { first_val = true; }
+
+              str_value.clear();
+              continue;
+            }
+            if (c == ')') {
+              str_value += c;
+              if (str_value.find("do()") != std::string::npos && str_value.find("don't()") == std::string::npos) { // prob better way of doing this, idgaf
+                str_value.clear();
+                do_ = true;
+              }
+              if (str_value.find("do()") == std::string::npos && str_value.find("don't()") != std::string::npos) {
+                str_value.clear();
+                do_ = false;
+              }
+              str_value.clear();
+            }
+            int_value = false;
+            continue;
+          }
+
+          if (int_val && c != '(' && c != ')') {
+            if (isdigit(c)) {
+              int_value += c;
+              /* std::cout << "int val: " << int_value << std::endl; */
+            }        
+            else {
+              if (int_value.size() > 0 && valid_.size() > 0 && first_val) {
+                /* std::cout << "pinged val: " << int_value << " on " << c << std::endl; */
+                valid_.pop_back();
+                first_val = false;
+              }
+              int_value.clear();
+            }
+          }
+        }
+        str_value += c;
+      }
     }
     input_file.close();
   }
@@ -59,29 +112,26 @@ int p2() {
     std::cout << "file is closed\n";
   }
 
-  std::vector<int> invalids;
-  std::vector<int> valids;
-  for (int j = 0; j < report_map.size(); ++j) {
-    auto r = report_map[j];
-    if (!check_if_valid(r)) {
-      invalids.push_back(j);
-      continue;
+  if (valid_.size() % 2 != 0) {
+    std::cout << "Valid vector is not of even size. Something went wrong" << std::endl;
+    std::cout << valid_.size() << std::endl;
+    for (auto c : valid_) {
+      std::cout << c << " ";
     }
-    valids.push_back(j);
+    std::cout << std::endl;
+    return 1;
   }
 
-  for (auto j : invalids) {
-    for (int i = 0; i < report_map[j].size(); ++i) {
-      auto copy_v = report_map[j];
-      copy_v.erase(copy_v.begin() + i);
-      if (check_if_valid(copy_v)) {
-        valids.push_back(j);
-        break;
-      }
-    }
+  int total = 0;
+
+  for (int i = 0; i < valid_.size(); i+=2) {
+    int v1 = std::atoi(valid_[i].c_str());
+    int v2 = std::atoi(valid_[i+1].c_str());
+    total += v1 * v2;
+    std::cout << valid_[i] << "*" << valid_[i+1] << std::endl;
   }
 
-  std::cout << "Valids size: " << valids.size() << std::endl;
+  std::cout << "total: " << total << std::endl;
 
   return 0;
 }
@@ -96,27 +146,68 @@ int p1() {
 
   std::cout << "Loaded file\n";
   std::string line;
-  std::unordered_map<int, std::vector<int>> report_map;
+  std::vector<std::string> valid_;
 
   int line_num = 0;
   if (input_file.is_open()) {
     while(std::getline(input_file, line))
     {
-      std::vector<int> report;
       std::string str_value;
+      std::string int_value;
+      bool int_val = false;
+      bool first_val = false;
       for (int i = 0; i < line.length(); ++i) {
-        if (isspace(line[i])) { 
-          report.push_back(std::atoi(str_value.c_str()));
+        char c = line[i];
+        if (str_value == "mul" && c != '(') { str_value.clear(); }
+        if (c == 'm') {
           str_value.clear();
-          continue; 
+          int_value.clear();
         }
-        str_value += line[i];
-      }
-      report.push_back(std::atoi(str_value.c_str()));
-      str_value.clear();
+        if (c == '(' && str_value == "mul") {
+          str_value += c;
+          int_val = true;
+          /* std::cout << "str val: " << str_value << std::endl; */
+        }
+        if (c == ',' || c == ')') {
+          if (is_number(int_value)) {
+            if (!first_val && str_value.find("mul") == std::string::npos) {
+              str_value.clear();
+              continue;
+            }
+            /* std::cout << "pushing int val: " << int_value << std::endl; */
+            /* std::cout << "___str val: " << str_value << std::endl; */
+            valid_.push_back(int_value);
+            int_value.clear();
 
-      report_map[line_num] = std::move(report);
-      line_num++;
+            if (first_val) { first_val = false; }
+            else { first_val = true; }
+
+            str_value.clear();
+            continue;
+          }
+          if (c == ')') {
+            str_value.clear();
+          }
+          int_value = false;
+          continue;
+        }
+
+        if (int_val && c != '(' && c != ')') {
+          if (isdigit(c)) {
+            int_value += c;
+            /* std::cout << "int val: " << int_value << std::endl; */
+          }        
+          else {
+            if (int_value.size() > 0 && valid_.size() > 0 && first_val) {
+              /* std::cout << "pinged val: " << int_value << " on " << c << std::endl; */
+              valid_.pop_back();
+              first_val = false;
+            }
+            int_value.clear();
+          }
+        }
+        str_value += c;
+      }
     }
     input_file.close();
   }
@@ -124,17 +215,26 @@ int p1() {
     std::cout << "file is closed\n";
   }
 
-  std::vector<int> invalids;
-  std::vector<int> valids;
-  for (int j = 0; j < report_map.size(); ++j) {
-    auto r = report_map[j];
-    if (!check_if_valid(r)) {
-      invalids.push_back(j);
-      continue;
+  if (valid_.size() % 2 != 0) {
+    std::cout << "Valid vector is not of even size. Something went wrong" << std::endl;
+    std::cout << valid_.size() << std::endl;
+    for (auto c : valid_) {
+      std::cout << c << " ";
     }
-    valids.push_back(j);
+    std::cout << std::endl;
+    return 1;
   }
-  std::cout << "Valid count: " << valids.size() << std::endl;
+
+  int total = 0;
+
+  for (int i = 0; i < valid_.size(); i+=2) {
+    int v1 = std::atoi(valid_[i].c_str());
+    int v2 = std::atoi(valid_[i+1].c_str());
+    total += v1 * v2;
+    /* std::cout << valid_[i] << "*" << valid_[i+1] << std::endl; */
+  }
+
+  std::cout << "total: " << total << std::endl;
 
   return 0;
 }
