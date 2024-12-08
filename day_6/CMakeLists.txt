@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(day5)
+project(day6)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -10,7 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}")
 option(PART1 "PART1" ${PART1})
 
 
-add_executable(day5 src/main.cpp)
+add_executable(day6 src/main.cpp)
 
 if("${PART1}")
   target_compile_options(${PROJECT_NAME} PRIVATE -DPART1)
