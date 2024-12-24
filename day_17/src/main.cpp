@@ -89,22 +89,26 @@ int p1() {
     std::cout << "file is closed\n";
   }
 
-  /* std::cout << "Reg A" << std::endl; */
-  /* for (auto v : reg_a) { */
-  /*   std::cout << v << std::endl; */
-  /* } */
-  /* std::cout << "Reg B" << std::endl; */
-  /* for (auto v : reg_b) { */
-  /*   std::cout << v << std::endl; */
-  /* } */
-  /* std::cout << "Reg C" << std::endl; */
-  /* for (auto v : reg_c) { */
-  /*   std::cout << v << std::endl; */
-  /* } */
-  /* std::cout << "Program" << std::endl; */
-  /* for (auto v : program) { */
-  /*   std::cout << v << std::endl; */
-  /* } */
+  std::cout << "Reg A" << std::endl;
+  for (auto v : reg_a) {
+    std::cout << v << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "Reg B" << std::endl;
+  for (auto v : reg_b) {
+    std::cout << v << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "Reg C" << std::endl;
+  for (auto v : reg_c) {
+    std::cout << v << " ";
+  }
+  std::cout << std::endl;
+  std::cout << "Program" << std::endl;
+  for (auto v : program) {
+    std::cout << v << " ";
+  }
+  std::cout << std::endl;
 
   return 0;
 }
